@@ -1,27 +1,27 @@
 # Onderzoeksplan
 
-Hoofdvraag: Hoe kan ik Open Telemetry inzetten bij een Microservice architectuur?
+Hoofdvraag: Hoe kan ik OpenTelemetry inzetten bij een Microservice architectuur?
 
-- Welk probleem lost Open Telemetry op?
-- Hoe werken de de belangrijkste componenten van Open Telemetry samen?
-- Hoe bouw ik Open Telemetry in?
+- Welk probleem lost OpenTelemetry op?
+- Hoe werken de de belangrijkste componenten van OpenTelemetry samen?
+- Hoe bouw ik OpenTelemetry in?
 - Welke best practices zijn er voor het implementeren van OpenTelemetry?
 
 ## Materials & Methods
 
 Onderstaand staat per vraag beschreven wat de toevoeging is van elke taak en hoe ik deze heb onderzocht.
 
-### Welk probleem lost Open Telemetry op?
+### Welk probleem lost OpenTelemetry op?
 
-Het doel van deze vraag is om een eerste blik op deze technologie werpen en te zien waarvoor deze technologie gebruikt wordt. Hierbij zal er gebruik gemaakt worden van de research method Literature study. Hierbij zal ik vooral op zoek gaan binnen de documentatie van Open Telemetry en andere beschikbare bronnen.
+Het doel van deze vraag is om een eerste blik op deze technologie werpen en te zien waarvoor deze technologie gebruikt wordt. Hierbij zal er gebruik gemaakt worden van de research method Literature study. Hierbij zal ik vooral op zoek gaan binnen de documentatie van OpenTelemetry en andere beschikbare bronnen.
 
-### Hoe werken de de belangrijkste componenten van Open Telemetry samen?
+### Hoe werken de de belangrijkste componenten van OpenTelemetry samen?
 
-Deze vraag bestaat uit twee delen, allereerst ga ik onderzoek doen naar de belangrijkste componenten van Open Telemetry d.m.v. Literature Study. Hierna ga ik vergelijken en uitzoeken wat de relatie tussen deze componenten is. Op deze manier komt er een duidelijk beeld van de "Core" van Open Telemetry.
+Deze vraag bestaat uit twee delen, allereerst ga ik onderzoek doen naar de belangrijkste componenten van OpenTelemetry d.m.v. Literature Study. Hierna ga ik vergelijken en uitzoeken wat de relatie tussen deze componenten is. Op deze manier komt er een duidelijk beeld van de "Core" van OpenTelemetry.
 
-### Hoe bouw ik Open Telemetry in?
+### Hoe bouw ik OpenTelemetry in?
 
-Ook is het belangrijk om te weten wat nodig is om Open Telemetry in een applicatie te bouwen, welke stappen dit inhoudt en hoe dit eruit ziet in code. Hiervoor ga ik gebruik maken van Literature Study en Prototyping.
+Ook is het belangrijk om te weten wat nodig is om OpenTelemetry in een applicatie te bouwen, welke stappen dit inhoudt en hoe dit eruit ziet in code. Hiervoor ga ik gebruik maken van Literature Study en Prototyping.
 
 ### Welke best practices zijn er voor het implementeren van OpenTelemetry?
 
