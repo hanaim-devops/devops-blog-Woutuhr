@@ -11,6 +11,8 @@
       - [Traces](#traces)
     - [Samenwerking](#samenwerking)
   - [How do they do it](#how-do-they-do-it)
+    - [Setting up](#setting-up)
+    - [Tracing toevoegen](#tracing-toevoegen)
   - [Best practices](#best-practices)
   - [Conclusie](#conclusie)
   - [Bronnen](#bronnen)
@@ -96,13 +98,124 @@ In de onderstaande afbeelding zie je een conceptueel en simpele OpenTelemetry-in
 
 ## How do they do it
 
+Naast te weten hoe OpenTelemetry (in grote lijnen) werkt, is het ook handig om een idee te hebben hoe dit er in code uit ziet. Voor dit voorbeeld maak ik gebruik van de programmeertaal .NET. Hierbij maak ik een simpele Web API welke een bestelsysteem moet voorstellen. Hierbij kan je een bestelling plaatsen naar `POST /Order`. Om het makkelijk te houden, genereert deze zelf een bestelling.
+
+### Setting up
+
+Begin met het opzetten van een .NET Web API en het toevoegen van de volgende NuGet packages:
+
+- Microsoft.EntityFrameworkCore
+- Microsoft.EntityFrameworkCore.InMemory
+
+Omdat deze demo een simulatie is, maak ik gebruik van een In Memory database. Ik ga niet teveel in detail over hoe dit werkt, maar ik laat de stappen wel zien. Begin hiervoor met het Order model aan te maken:
+
+```C#
+using System.ComponentModel.DataAnnotations;
+
+namespace OpenTelemetry.Demo.DAL;
+
+public class Order {
+  [Key]
+  public int Id { get; set; }
+  public Guid OrderNumber { get; set; }
+}
+```
+
+Maak hierna een DbContext aan voor deze applicatie:
+
+```C#
+using Microsoft.EntityFrameworkCore;
+
+namespace OpenTelemetry.Demo.DAL;
+
+public class DatabaseContext(DbContextOptions<DatabaseContext> options): DbContext(options) {
+  public DbSet<Order> Orders { get; set; }
+}
+```
+
+En voeg deze DbContext toe aan jouw `Program.cs`:
+
+```C#
+using Microsoft.EntityFrameworkCore;
+
+...
+
+builder.Services.AddDbContext<DatabaseContext>(options =>{
+  options.UseInMemoryDatabase("OpenTelemetryDemo");
+});
+```
+
+Voeg als laatste een controller toe:
+
+```C#
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Demo.DAL;
+
+namespace OpenTelemetry.Demo.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class OrderController(DatabaseContext dbContext): ControllerBase 
+{
+  [HttpPost]
+  public async Task Post()
+  {
+    var orderNumber = Guid.NewGuid();
+    var order = new Order
+    {
+      OrderNumber = orderNumber
+    };
+    
+    dbContext.Orders.Add(order);
+    await dbContext.SaveChangesAsync();
+  }
+  
+  [HttpGet]
+  public async Task<List<Order>> Get()
+  {
+    return await dbContext.Orders.ToListAsync();
+  }
+}
+```
+
+### Tracing toevoegen
+
+Begin met het toevoegen van de OpenTelemetry packages:
+
+- OpenTelemetry.Extensions.Hosting
+- OpenTelemetry.Instrumentation.AspNetCore
+- OpenTelemetry.Instrumentation.Http
+- OpenTelemetry.Exporter.Console
+
+Hierna is het e.e.a. aan setup nodig, dit is als volgt:
+
+```C#
+
+```
+
+<!-- TODO automatische vs handmatige instrumentatie benoemen -->
+
 ## Best practices
+
+- **Begin klein**<br>
+  Start met het instrumenteren van één belangrijke service of functie, en breid het vervolgens geleidelijk uit naar andere onderdelen.
+- **Gebruik automatische instrumentatie**<br>
+  Waar mogelijk, gebruik automatische instrumentatie om snel inzicht te krijgen zonder veel codewijzigingen.
+- **Kies relevante signalen**<br>
+  Verzamel alleen de signalen die echt waardevol zijn, zoals traces, metrics, en logs, om ruis te verminderen.
+- **Voeg nuttige attributen toe**<br>
+  Zorg dat je spans en metrics duidelijke attributen hebben, zoals foutmeldingen of gebruikerscontext, om debugging eenvoudiger te maken.
+- **Verzamel data op één plek**<br>
+  Gebruik tools zoals een collector om alle telemetry data op één plaats samen te brengen voor analyse.
 
 ## Conclusie
 
 ## Bronnen
 
+8-10-24
 https://opentelemetry.io/docs/what-is-opentelemetry/
 https://opentelemetry.io/docs/concepts/signals/
 https://opentelemetry.io/docs/specs/semconv/http/http-metrics/
-https://opentelemetry.io/docs/specs/otel/overview/
+https://opentelemetry.io/docs/specs/otel/overview/https://opentelemetry.io/docs/languages/net/getting-started/
+https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/
