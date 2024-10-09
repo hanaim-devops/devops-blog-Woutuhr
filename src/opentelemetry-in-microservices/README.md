@@ -4,6 +4,8 @@
 
 *[Wouter Gosseling, oktober 2024.](https://github.com/hanaim-devops/devops-blog-Woutuhr)*
 
+In deze blogpost neem ik, samen met jou, een kijkje in de wereld van OpenTelemetry, een monitoring tool voor jouw applicatie(s). Ik bespreek de belangrijkste concepten, hoe je OpenTelemetry (in de basis) implementeert, en concludeer hoe bruikbaar OpenTelemetry is voor een Microservice architectuur.
+
 - [OpenTelemetry in Microservices](#opentelemetry-in-microservices)
   - [The basics](#the-basics)
   - [An overview](#an-overview)
@@ -357,6 +359,8 @@ Resource associated with Metric:
   Gebruik tools zoals een collector om alle telemetry data op één plaats samen te brengen voor analyse.
 
 ## Conclusie
+
+OpenTelemetry (OTel) is een handige tool voor inzicht in applicaties. Met centrale logging en context propagation is het goed geschikt voor een microservice-architectuur. Een centrale telemetry service kan eenvoudig worden opgenomen in het landschap. Dankzij de automatische instrumentatie is de eerste stap om OTel in te bouwen minimaal, zoals aanbevolen door best practices. Daarnaast helpt OTel om sneller problemen te vinden en de prestaties van microservices te verbeteren, wat essentieel is voor de betrouwbaarheid en schaalbaarheid van je diensten.
 
 ## Bronnen
 
