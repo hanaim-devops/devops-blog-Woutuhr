@@ -19,7 +19,7 @@ Het doel van deze vraag is om een eerste blik op deze technologie werpen en te z
 
 Deze vraag bestaat uit twee delen, allereerst ga ik onderzoek doen naar de belangrijkste componenten van OpenTelemetry d.m.v. Literature Study. Hierna ga ik vergelijken en uitzoeken wat de relatie tussen deze componenten is. Op deze manier komt er een duidelijk beeld van de "Core" van OpenTelemetry.
 
-### Hoe bouw ik OpenTelemetry in?
+### Hoe bouw ik OpenTelemetry in een kleine app in?
 
 Ook is het belangrijk om te weten wat nodig is om OpenTelemetry in een applicatie te bouwen, welke stappen dit inhoudt en hoe dit eruit ziet in code. Hiervoor ga ik gebruik maken van Literature Study en Prototyping.
 

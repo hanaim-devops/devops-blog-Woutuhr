@@ -12,7 +12,9 @@
     - [Samenwerking](#samenwerking)
   - [How do they do it](#how-do-they-do-it)
     - [Setting up](#setting-up)
-    - [Tracing toevoegen](#tracing-toevoegen)
+    - [Automatische instrumentatie toevoegen](#automatische-instrumentatie-toevoegen)
+    - [Handmatige instrumentatie toevoegen](#handmatige-instrumentatie-toevoegen)
+    - [Resultaat](#resultaat)
   - [Best practices](#best-practices)
   - [Conclusie](#conclusie)
   - [Bronnen](#bronnen)
@@ -159,7 +161,7 @@ namespace OpenTelemetry.Demo.Controllers;
 public class OrderController(DatabaseContext dbContext): ControllerBase 
 {
   [HttpPost]
-  public async Task Post()
+  public async Task<IActionResult> Post()
   {
     var orderNumber = Guid.NewGuid();
     var order = new Order
@@ -169,6 +171,8 @@ public class OrderController(DatabaseContext dbContext): ControllerBase
     
     dbContext.Orders.Add(order);
     await dbContext.SaveChangesAsync();
+
+    return Created();
   }
   
   [HttpGet]
@@ -179,7 +183,7 @@ public class OrderController(DatabaseContext dbContext): ControllerBase
 }
 ```
 
-### Tracing toevoegen
+### Automatische instrumentatie toevoegen
 
 Begin met het toevoegen van de OpenTelemetry packages:
 
@@ -188,13 +192,156 @@ Begin met het toevoegen van de OpenTelemetry packages:
 - OpenTelemetry.Instrumentation.Http
 - OpenTelemetry.Exporter.Console
 
-Hierna is het e.e.a. aan setup nodig, dit is als volgt:
+Hierna is het e.e.a. aan setup nodig, hiervoor voeg je de het volgende aan de `Program.cs` toe:
 
 ```C#
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(configure => configure.AddService("OrderService"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter()
+    ).WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter()
+    ).WithLogging(logging => logging
+        .AddConsoleExporter()
+    );
+```
+
+Voor dit voorbeeld maak ik gebruik van de Console Exporter (de OpenTelemetry.Exporter.Console package). In productie wil hiermee naar een andere tool exporteren zodat de logs geanalyseerd kunnen worden. Verder heb ik hier alle 3 vormen van een Signal geïnitieerd. Indien je geen gebruik maakt van bijv. Metrics, kan dat stukje weggelaten worden.
+
+Bij bij zowel de Tracing als de Metrics setup komen de method calls `AddAspNetCoreInstrumentation` en `AddHttpClientInstrumentation`. Deze zijn toegevoegd vanuit de packages welke eerder genoemd zijn, en voegen zogenaamde "automatische instrumentatie" toe. Dit houdt eigenlijk in dat, zonder verder code aan te passen, er zal zaken gemeten, gelogd en getraced worden binnen de applicatie.
+
+### Handmatige instrumentatie toevoegen
+
+In de voorbeeld applicatie wil ik nu ook weten hoe lang het duurt om een order aan te maken. Om deze reden wil ik een Trace gaan inbouwen in .NET.
+Hiervoor updaten wij de controller met de volgende code:
+
+```C#
+using System.Diagnostics;
+
+...
+
+[ApiController]
+[Route("[controller]")]
+public class OrderController(DatabaseContext dbContext, ILogger<OrderController> logger): ControllerBase
+{
+    private static readonly ActivitySource ActivitySource = new(nameof(OrderController));
+
+    [HttpPost]
+    public async Task<IActionResult> Post()
+    {
+        using var activity = ActivitySource.StartActivity("CreateOrder", "1.0.0");
+        var orderNumber = Guid.NewGuid();
+
+        activity?.SetTag("operation.orderNumber", orderNumber);
+        logger.LogInformation("Saving order with order number {orderNumber}", orderNumber);
+
+
+        var order = new Order
+        {
+            OrderNumber = orderNumber
+        };
+
+        dbContext.Orders.Add(order);
+        await dbContext.SaveChangesAsync();
+        
+        return Created();
+    }
+
+    ...
+}
 
 ```
 
-<!-- TODO automatische vs handmatige instrumentatie benoemen -->
+Verder is belangrijk dat deze ActivitySource ook wordt toegevoegd in de `Program.cs`, anders wordt deze niet in de console geëxporteerd. Don't ask how I know. Binnen de `WithTracing` method call voeg je het volgende toe:
+
+```C#
+  .AddSource(nameof(OrderController))
+```
+
+Hierbij is het belangrijk dat de naam hier overeen komt met die in de controller. Voor dit voorbeeld maak ik gebruik van de `nameof` methode in .NET, deze geeft de naam i.c.m. de namespace van een o.a. class terug.
+
+Nu hoor ik je denken, ik ging toch een Trace inbouwen? Ik zie hier nergens Trace staan! Dat klopt, dit heeft met .NET standaarden te maken. Binnen .NET zijn `ActivitySource` en `Activity` concepten welke al veel langer bestaan dan OpenTelemetry. Deze komen uit de `System.Diagnostics` namespace en zijn overgenomen door OpenTelemetry. Hierbij moet je bedenken dat een `ActivitySource` eigenlijk een `Tracer` (de class welke een trace maakt) is en de `Activity` een `Span` is.
+
+Misschien is je ook opgevallen dat ik een Activity aanmaak evenals een Log. Dit zijn gelijk twee manieren om een stukje instrumentatie aan jouw code toe te voegen.
+
+### Resultaat
+
+Wanneer je de bovenstaande code geïmplementeerd hebt, krijg je , wanneer je de app runt en de POST endpoint aanroept, het onderstaande resultaat in jouw console.
+
+```console
+LogRecord.SpanId:                  36125aca871393a3
+LogRecord.TraceFlags:              Recorded
+LogRecord.CategoryName:            Microsoft.EntityFrameworkCore.Update
+LogRecord.Severity:                Info
+LogRecord.SeverityText:            Information
+LogRecord.Body:                    Saved {count} entities to in-memory store.
+LogRecord.Attributes (Key:Value):
+    count: 1
+    OriginalFormat (a.k.a Body): Saved {count} entities to in-memory store.
+LogRecord.EventId:                 30100
+LogRecord.EventName:               Microsoft.EntityFrameworkCore.Update.ChangesSaved
+
+Resource associated with LogRecord:
+service.name: OrderService
+service.instance.id: f32347da-71e2-40b3-91df-6debe81e5ca3
+telemetry.sdk.name: opentelemetry
+telemetry.sdk.language: dotnet
+telemetry.sdk.version: 1.9.0
+
+Activity.TraceId:            1426c3ecd8373730fbca5c157a2158cc
+Activity.SpanId:             36125aca871393a3
+Activity.TraceFlags:         Recorded
+Activity.ParentSpanId:       0e8e1e161f68f746
+Activity.ActivitySourceName: OrderController
+Activity.DisplayName:        CreateOrder
+Activity.Kind:               Internal
+Activity.StartTime:          2024-10-09T12:29:56.5415987Z
+Activity.Duration:           00:00:02.8862412
+Activity.Tags:
+    operation.orderNumber: e0386547-d942-4085-89fe-cbcddd04b2a4
+Resource associated with Activity:
+    service.name: OrderService
+    service.instance.id: f32347da-71e2-40b3-91df-6debe81e5ca3
+    telemetry.sdk.name: opentelemetry
+    telemetry.sdk.language: dotnet
+    telemetry.sdk.version: 1.9.0
+
+Activity.TraceId:            1426c3ecd8373730fbca5c157a2158cc
+Activity.SpanId:             0e8e1e161f68f746
+Activity.TraceFlags:         Recorded
+Activity.ActivitySourceName: Microsoft.AspNetCore
+Activity.DisplayName:        POST Order
+Activity.Kind:               Server
+Activity.StartTime:          2024-10-09T12:29:56.1451350Z
+Activity.Duration:           00:00:03.3330143
+Activity.Tags:
+    server.address: localhost
+    server.port: 44314
+    http.request.method: POST
+    url.scheme: https
+    url.path: /Order
+    network.protocol.version: 2
+    user_agent.original: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36
+    http.route: Order
+    http.response.status_code: 204
+Resource associated with Activity:
+    service.name: OrderService
+    service.instance.id: f32347da-71e2-40b3-91df-6debe81e5ca3
+    telemetry.sdk.name: opentelemetry
+    telemetry.sdk.language: dotnet
+    telemetry.sdk.version: 1.9.0
+
+Resource associated with Metric:
+    service.name: OrderService
+    service.instance.id: f32347da-71e2-40b3-91df-6debe81e5ca3
+    telemetry.sdk.name: opentelemetry
+    telemetry.sdk.language: dotnet
+    telemetry.sdk.version: 1.9.0
+```
 
 ## Best practices
 
@@ -213,9 +360,10 @@ Hierna is het e.e.a. aan setup nodig, dit is als volgt:
 
 ## Bronnen
 
-8-10-24
-https://opentelemetry.io/docs/what-is-opentelemetry/
-https://opentelemetry.io/docs/concepts/signals/
-https://opentelemetry.io/docs/specs/semconv/http/http-metrics/
-https://opentelemetry.io/docs/specs/otel/overview/https://opentelemetry.io/docs/languages/net/getting-started/
-https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/
+Getting started. (2024, June 2). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/languages/net/getting-started/<br>
+Overview. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/specs/otel/overview/<br>
+Semantic Conventions for HTTP metrics. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/specs/semconv/http/http-metrics/<br>
+Signals. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/concepts/signals/<br>
+Somerville, A., & Simons, H. (2024, March 21). OpenTelemetry best practices: A user’s guide to getting started with OpenTelemetry. Grafana Labs. Retrieved October 8, 2024, from https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/<br>
+Thwaites, M. (2022, June 10). What the Hell is Activity Anyway? Honeycomb. Retrieved October 9, 2024, from https://www.honeycomb.io/what-is-activity-in-dotnet<br>
+What is OpenTelemetry? (2024, August 7). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/what-is-opentelemetry/
