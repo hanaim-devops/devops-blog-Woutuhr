@@ -21,8 +21,6 @@ In deze blogpost neem ik, samen met jou, een kijkje in de wereld van OpenTelemet
   - [Conclusie](#conclusie)
   - [Bronnen](#bronnen)
 
-<hr/>
-
 ## The basics
 
 OpenTelemetry (ook bekend als OTel) verzamelt data zoals traces, logs en metrics van je applicaties en services. Deze informatie geeft inzicht in hoe je systeem presteert, waar problemen optreden, en helpt bij het opsporen van bottlenecks of fouten. Hierdoor kun je makkelijker en sneller problemen oplossen.
@@ -71,7 +69,7 @@ Zoals eerder benoemd is een Signal een overkoepelende term, binnen OTel komt een
 
 #### Traces
 
-Bij een Signal van het type Trace bestaat deze uit een nieuw concept, namelijk een Span. Een Span vertegenwoordigt een specifieke actie of bewerking binnen een Trace, zoals een API-aanroep of een database-query. Elke span bevat informatie zoals de start- en eindtijd, status en eventuele foutmeldingen. Samen vormen de spans een compleet overzicht van de flow van een verzoek door verschillende microservices.
+Bij een Signal van het type Trace bestaat deze uit een nieuw concept, namelijk een Span. Een Span vertegenwoordigt een specifieke actie of bewerking binnen een Trace, zoals een API-aanroep of een database-query. Samen vormen de spans een compleet overzicht van de flow van een verzoek door verschillende microservices.
 
 Onderstaand is de relatie tussen een Trace en een span als tijdlijn weergegeven.
 
@@ -98,11 +96,11 @@ Belangrijk om te weten is dat een Span altijd de volgende informatie bevat:
 
 <img src="plaatjes/concept-overview.png" height="200" align="right" alt="Concepten van OTel">
 
-In de onderstaande afbeelding zie je een conceptueel en simpele OpenTelemetry-instantie. Hierbij zijn twee applicaties welke Signals sturen naar de OpenTelemetry Collector. Binnen deze collector staat een Enrichment Processor, deze kan bijv. Signals filteren, samenvoegen, enz. Hier ga ik verder niet in detail op in, mocht je het interessant vinden, zie dan de [docs](https://opentelemetry.io/docs/collector/) over de Collector. De Collector exporteert de data daarna weer naar een extern systeem. Zoals er te zien is, wordt alle data geëxporteerd naar de "Telemetry Database", in de praktijk zal dit verwisseld worden met een tool als [Grafana](https://grafana.com/) of [Jaeger](https://www.jaegertracing.io/).
+In de onderstaande afbeelding zie je een conceptueel en simpele OpenTelemetry-instantie. Hierbij zijn twee applicaties welke Signals sturen naar de OpenTelemetry Collector. Binnen deze collector staat een Enrichment Processor, deze kan bijv. Signals filteren, samenvoegen, enz. Mocht je het interessant vinden, zie dan de [docs](https://opentelemetry.io/docs/collector/) over de Collector. De Collector exporteert de data daarna weer naar een externe database. Zoals er te zien is, wordt alle data geëxporteerd naar de "Telemetry Database", in de praktijk zal dit verwisseld worden met een tool als [Grafana](https://grafana.com/) of [Jaeger](https://www.jaegertracing.io/).
 
 ## How do they do it
 
-Naast te weten hoe OpenTelemetry (in grote lijnen) werkt, is het ook handig om een idee te hebben hoe dit er in code uit ziet. Voor dit voorbeeld maak ik gebruik van de programmeertaal .NET. Hierbij maak ik een simpele Web API welke een bestelsysteem moet voorstellen. Hierbij kan je een bestelling plaatsen naar `POST /Order`. Om het makkelijk te houden, genereert deze zelf een bestelling.
+Naast te weten hoe OpenTelemetry (in grote lijnen) werkt, is het ook handig om een idee te hebben hoe dit er in code uit ziet. Voor dit voorbeeld maak ik gebruik van de programmeertaal .NET. Hierbij maak ik een simpele Web API welke een bestelsysteem moet voorstellen. Hierbij kan je een bestelling plaatsen naar `POST /Order`. Om het makkelijk te houden, genereert de app zelf een bestelling.
 
 ### Setting up
 
@@ -212,14 +210,13 @@ builder.Services.AddOpenTelemetry()
     );
 ```
 
-Voor dit voorbeeld maak ik gebruik van de Console Exporter (de OpenTelemetry.Exporter.Console package). In productie wil hiermee naar een andere tool exporteren zodat de logs geanalyseerd kunnen worden. Verder heb ik hier alle 3 vormen van een Signal geïnitieerd. Indien je geen gebruik maakt van bijv. Metrics, kan dat stukje weggelaten worden.
+In dit voorbeeld gebruik ik de Console Exporter (de `OpenTelemetry.Exporter.Console` package). In productie kun je naar een externe tool exporteren voor loganalyse. Alle drie de signalen zijn geïnitieerd, maar je kunt delen, zoals Metrics, weglaten als je ze niet nodig hebt.
 
-Bij bij zowel de Tracing als de Metrics setup komen de method calls `AddAspNetCoreInstrumentation` en `AddHttpClientInstrumentation`. Deze zijn toegevoegd vanuit de packages welke eerder genoemd zijn, en voegen zogenaamde "automatische instrumentatie" toe. Dit houdt eigenlijk in dat, zonder verder code aan te passen, er zal zaken gemeten, gelogd en getraced worden binnen de applicatie.
+Bij bij zowel de Tracing als de Metrics setup komen de method calls `AddAspNetCoreInstrumentation` en `AddHttpClientInstrumentation`. Deze zijn toegevoegd vanuit de eerder genoemde packages, en voegen "automatische instrumentatie" toe. Dit houdt in dat, zonder verder code aan te passen, er  gemeten, gelogd en getraced wordt binnen de applicatie.
 
 ### Handmatige instrumentatie toevoegen
 
-In de voorbeeld applicatie wil ik nu ook weten hoe lang het duurt om een order aan te maken. Om deze reden wil ik een Trace gaan inbouwen in .NET.
-Hiervoor updaten wij de controller met de volgende code:
+In de voorbeeldapplicatie wil ik meten hoe lang het duurt om een order aan te maken. Daarom voeg ik een trace toe in .NET. We updaten hiervoor de controller met de volgende code:
 
 ```C#
 using System.Diagnostics;
@@ -264,15 +261,15 @@ Verder is belangrijk dat deze ActivitySource ook wordt toegevoegd in de `Program
   .AddSource(nameof(OrderController))
 ```
 
-Hierbij is het belangrijk dat de naam hier overeen komt met die in de controller. Voor dit voorbeeld maak ik gebruik van de `nameof` methode in .NET, deze geeft de naam i.c.m. de namespace van een o.a. class terug.
+Het is belangrijk dat de naam overeenkomt met die in de controller. In dit voorbeeld gebruik ik de `nameof`-methode in .NET, die de naam en namespace van bijvoorbeeld een klasse retourneert.
 
-Nu hoor ik je denken, ik ging toch een Trace inbouwen? Ik zie hier nergens Trace staan! Dat klopt, dit heeft met .NET standaarden te maken. Binnen .NET zijn `ActivitySource` en `Activity` concepten welke al veel langer bestaan dan OpenTelemetry. Deze komen uit de `System.Diagnostics` namespace en zijn overgenomen door OpenTelemetry. Hierbij moet je bedenken dat een `ActivitySource` eigenlijk een `Tracer` (de class welke een trace maakt) is en de `Activity` een `Span` is.
+Nu hoor ik je denken, ik ging toch een Trace inbouwen? Ik zie hier nergens Trace staan! Dat klopt, dit komt door de .NET-standaarden. In .NET worden `ActivitySource` en `Activity` gebruikt, begrippen die al langer bestaan en afkomstig zijn uit de `System.Diagnostics` namespace. OpenTelemetry heeft deze overgenomen. Eigenlijk is een `ActivitySource` hetzelfde als een `Tracer`, en een `Activity` staat gelijk aan een `Span`.
 
 Misschien is je ook opgevallen dat ik een Activity aanmaak evenals een Log. Dit zijn gelijk twee manieren om een stukje instrumentatie aan jouw code toe te voegen.
 
 ### Resultaat
 
-Wanneer je de bovenstaande code geïmplementeerd hebt, krijg je , wanneer je de app runt en de POST endpoint aanroept, het onderstaande resultaat in jouw console.
+Wanneer je de bovenstaande code geïmplementeerd hebt, krijg je, wanneer je de app runt en de POST endpoint aanroept, het onderstaande resultaat in jouw console.
 
 ```console
 LogRecord.SpanId:                  36125aca871393a3
@@ -348,11 +345,11 @@ Resource associated with Metric:
 ## Best practices
 
 - **Begin klein**<br>
-  Start met het instrumenteren van één belangrijke service of functie, en breid het vervolgens geleidelijk uit naar andere onderdelen.
+  Start met het instrumenteren van één belangrijke service of functie, en breid het vervolgens uit.
 - **Gebruik automatische instrumentatie**<br>
   Waar mogelijk, gebruik automatische instrumentatie om snel inzicht te krijgen zonder veel codewijzigingen.
 - **Kies relevante signalen**<br>
-  Verzamel alleen de signalen die echt waardevol zijn, zoals traces, metrics, en logs, om ruis te verminderen.
+  Verzamel alleen de signalen die echt waardevol zijn, om ruis te verminderen.
 - **Voeg nuttige attributen toe**<br>
   Zorg dat je spans en metrics duidelijke attributen hebben, zoals foutmeldingen of gebruikerscontext, om debugging eenvoudiger te maken.
 - **Verzamel data op één plek**<br>
@@ -370,4 +367,5 @@ Semantic Conventions for HTTP metrics. (n.d.). OpenTelemetry. Retrieved October 
 Signals. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/concepts/signals/<br>
 Somerville, A., & Simons, H. (2024, March 21). OpenTelemetry best practices: A user’s guide to getting started with OpenTelemetry. Grafana Labs. Retrieved October 8, 2024, from https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/<br>
 Thwaites, M. (2022, June 10). What the Hell is Activity Anyway? Honeycomb. Retrieved October 9, 2024, from https://www.honeycomb.io/what-is-activity-in-dotnet<br>
-What is OpenTelemetry? (2024, August 7). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/what-is-opentelemetry/
+What is OpenTelemetry? (2024, August 7). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/what-is-opentelemetry/<br>
+ChatGPT. (n.d.). https://chatgpt.com/share/6703b59a-8b0c-8012-9e38-3001462c6a10

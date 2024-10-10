@@ -28,8 +28,8 @@ Ook is het belangrijk om te weten wat nodig is om OpenTelemetry in een applicati
 Als laatste ga ik onderzoek doen naar de best practices bij het implementeren van deze technologie. Deze tips en richtlijnen geven een extra "jumpstart" bij het implementeren van OpenTelemetry. Dit heb ik gedaan d.m.v. Literature study.
 
 ## Bronnen
-<!-- TODO updaten naar APA -->
 
-[ChatGPT chat](https://chatgpt.com/share/6703b59a-8b0c-8012-9e38-3001462c6a10)
-[Literature Study](https://ictresearchmethods.nl/library/literature-study/)
-Aim Controle kaart
+ChatGPT. (n.d.). https://chatgpt.com/share/6703b59a-8b0c-8012-9e38-3001462c6a10>br?
+Hbo-I. (n.d.). ICT Research Methods — Methods Pack for research in ICT. ICT Research Methods. https://ictresearchmethods.nl/library/literature-study/<br>
+Hbo-I. (n.d.-b). ICT Research Methods — Methods Pack for research in ICT. ICT Research Methods. https://ictresearchmethods.nl/workshop/prototyping/<br>
+AIM Controlekaart - Minor DevOps materiaal v1.1.0 (laatste update: unknown). (n.d.). https://minordevops.nl/week-6-onderzoek/aim-controle-kaart.html
