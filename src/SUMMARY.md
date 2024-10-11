@@ -1,5 +1,5 @@
 # Summary
 
 - [Home](./README.md)
-- [Dev blog](./dev-blog-name-in-kebab-case/README.md)
+- [Dev blog](./opentelemetry-in-microservices/README.md)
 - [Onderzoeksplan](./onderzoeksplan.md)
