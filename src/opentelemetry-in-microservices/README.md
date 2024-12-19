@@ -25,10 +25,8 @@ In deze blogpost neem ik, samen met jou, een kijkje in de wereld van OpenTelemet
 
 OpenTelemetry (ook bekend als OTel) verzamelt data zoals traces, logs en metrics van je applicaties en services. Deze informatie geeft inzicht in hoe je systeem presteert, waar problemen optreden, en helpt bij het opsporen van bottlenecks of fouten. Hierdoor kun je makkelijker en sneller problemen oplossen.
 
-```text
 "A major goal of OpenTelemetry is that you can easily instrument your applications or systems, no matter their language, infrastructure, or runtime environment. The storage and visualization of telemetry is intentionally left to other tools."
 (OpenTelemetry, 2024)
-```
 
 De bovenstaande quote laat zien dat OpenTelemetry ontworpen is om observability makkelijk en universeel toepasbaar te maken, ongeacht de gebruikte programmeertaal, infrastructuur of runtime. Dit is vooral relevant voor microservices, omdat deze vaak bestaan uit verschillende services die ook nog eens in diverse talen geschreven zijn (polyglot architectuur). OpenTelemetry biedt een standaard manier om deze polyglot omgevingen te instrumenteren, zonder gebonden te zijn aan een specifieke opslag- of visualisatietool, wat zorgt voor flexibiliteit en schaalbaarheid.
 
@@ -46,12 +44,14 @@ OpenTelemetry (verder benoemd als OTel) is een uitgebreide tool met veel geavanc
   - Logs
 
   Het concept Signal is [onderstaand](#signals-a-deeper-dive) verder beschreven.
+  
+  (OpenTelemetry, 2024)
 
 - **Context Propagation**<br>
   Binnen OpenTelemetry kunnen metadata, zoals trace-ID's, wordt doorgegeven tussen microservices tijdens een verzoek. Dit heet Context Propagation. Dit helpt om de volledige route van het verzoek te volgen over bijv. verschillende microservices, waardoor je beter kunt zien waar problemen zich voordoen en hoe de prestaties van het systeem zijn.
 
 - **Semantic Concepts**<br>
-  Dit zijn gestandaardiseerde afspraken over de naamgeving en structuur van telemetry data. Dit zorgt ervoor dat gegevens consistent opgeslagen worden. Dit maakt het makkelijker om data te analyseren en te vergelijken. Voorbeelden zijn gestandaardiseerde namen voor HTTP-methoden zoals `http.request.method` en `server.address`. Deze concepten
+  Dit zijn gestandaardiseerde afspraken over de naamgeving en structuur van telemetry data. Dit zorgt ervoor dat gegevens consistent opgeslagen worden. Dit maakt het makkelijker om data te analyseren en te vergelijken. Voorbeelden zijn gestandaardiseerde namen voor HTTP-methoden zoals `http.request.method` en `server.address` (OpenTelemetry, 2024).
   
 - **The OpenTelemetry Collector**<br>
   Dit component verzamelt, verwerkt en exporteert data naar verschillende observability-tools. Het fungeert als een tussenstation dat gegevens uit verschillende bronnen samenbrengt, zodat je deze kunt analyseren en visualiseren. Hierdoor wordt het eenvoudiger om inzicht te krijgen in de prestaties en het gedrag van je systemen. De OpenTelemetry Collector kan draaien als een zelfstandige service, in containers, of als sidecar naast applicaties.
@@ -82,6 +82,8 @@ Onderstaand is de relatie tussen een Trace en een span als tijdlijn weergegeven.
     [Span C····················································]
          [Span E·······]        [Span F··]
 ```
+
+*bron: https://opentelemetry.io/docs/specs/otel/overview/* 
 
 Belangrijk om te weten is dat een Span altijd de volgende informatie bevat:
 
@@ -263,7 +265,7 @@ Verder is belangrijk dat deze ActivitySource ook wordt toegevoegd in de `Program
 
 Het is belangrijk dat de naam overeenkomt met die in de controller. In dit voorbeeld gebruik ik de `nameof`-methode in .NET, die de naam en namespace van bijvoorbeeld een klasse retourneert.
 
-Nu hoor ik je denken, ik ging toch een Trace inbouwen? Ik zie hier nergens Trace staan! Dat klopt, dit komt door de .NET-standaarden. In .NET worden `ActivitySource` en `Activity` gebruikt, begrippen die al langer bestaan en afkomstig zijn uit de `System.Diagnostics` namespace. OpenTelemetry heeft deze overgenomen. Eigenlijk is een `ActivitySource` hetzelfde als een `Tracer`, en een `Activity` staat gelijk aan een `Span`.
+Nu hoor ik je denken, ik ging toch een Trace inbouwen? Ik zie hier nergens Trace staan! Dat klopt, dit komt door de .NET-standaarden. In .NET worden `ActivitySource` en `Activity` gebruikt, begrippen die al langer bestaan en afkomstig zijn uit de `System.Diagnostics` namespace. OpenTelemetry heeft deze overgenomen. Eigenlijk is een `ActivitySource` hetzelfde als een `Tracer`, en een `Activity` staat gelijk aan een `Span`. (Thwaites, 2024)
 
 Misschien is je ook opgevallen dat ik een Activity aanmaak evenals een Log. Dit zijn gelijk twee manieren om een stukje instrumentatie aan jouw code toe te voegen.
 
@@ -354,6 +356,8 @@ Resource associated with Metric:
   Zorg dat je spans en metrics duidelijke attributen hebben, zoals foutmeldingen of gebruikerscontext, om debugging eenvoudiger te maken.
 - **Verzamel data op één plek**<br>
   Gebruik tools zoals een collector om alle telemetry data op één plaats samen te brengen voor analyse.
+
+(Sommerville and Simons, 2024) (ChatGPT, 2024)
 
 ## Conclusie
 
