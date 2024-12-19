@@ -365,11 +365,11 @@ OpenTelemetry (OTel) is een handige tool voor inzicht in applicaties. Met centra
 
 ## Bronnen
 
-Getting started. (2024, June 2). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/languages/net/getting-started/<br>
-Overview. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/specs/otel/overview/<br>
-Semantic Conventions for HTTP metrics. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/specs/semconv/http/http-metrics/<br>
-Signals. (n.d.). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/concepts/signals/<br>
-Somerville, A., & Simons, H. (2024, March 21). OpenTelemetry best practices: A user’s guide to getting started with OpenTelemetry. Grafana Labs. Retrieved October 8, 2024, from https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/<br>
-Thwaites, M. (2022, June 10). What the Hell is Activity Anyway? Honeycomb. Retrieved October 9, 2024, from https://www.honeycomb.io/what-is-activity-in-dotnet<br>
-What is OpenTelemetry? (2024, August 7). OpenTelemetry. Retrieved October 8, 2024, from https://opentelemetry.io/docs/what-is-opentelemetry/<br>
+Getting started. (2024, Juni 2). OpenTelemetry. Geraadpleegd op 8 Oktober 2024, van https://opentelemetry.io/docs/languages/net/getting-started/<br>
+Overview. (n.d.). OpenTelemetry. Geraadpleegd op 8 Oktober 2024, van https://opentelemetry.io/docs/specs/otel/overview/<br>
+Semantic Conventions for HTTP metrics. (n.d.). OpenTelemetry. Geraadpleegd op 8 Oktober 2024, van https://opentelemetry.io/docs/specs/semconv/http/http-metrics/<br>
+Signals. (n.d.). OpenTelemetry. Geraadpleegd op 8 Oktober 2024, van https://opentelemetry.io/docs/concepts/signals/<br>
+Somerville, A., & Simons, H. (21 maart 2024). OpenTelemetry best practices: A user’s guide to getting started with OpenTelemetry. Grafana Labs. Geraadpleegd op 8 Oktober 2024, van https://grafana.com/blog/2023/12/18/opentelemetry-best-practices-a-users-guide-to-getting-started-with-opentelemetry/<br>
+Thwaites, M. (10 Juni 2022). What the Hell is Activity Anyway? Honeycomb. Geraadpleegd op 9 Oktober 2024, van https://www.honeycomb.io/what-is-activity-in-dotnet<br>
+What is OpenTelemetry? (7 Augustus 2024). OpenTelemetry. Geraadpleegd op 8 Oktober 2024, van https://opentelemetry.io/docs/what-is-opentelemetry/<br>
 ChatGPT. (n.d.). https://chatgpt.com/share/6703b59a-8b0c-8012-9e38-3001462c6a10
